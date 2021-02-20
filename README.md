@@ -167,7 +167,7 @@ contact us if you have any questions!
 | Lin Yang      | linyang@tju.edu.cn     | YangLin-George|
 | Junjie Chen * | junjiechen@tju.edu.cn  | JunjieChen    |
 | Zan Wang      | wangzan@tju.edu.cn     | tjuwangzan    |
-| Weijing Wang  | wangweijing@tju.edu.cn |vikingstudyhard|
+| Weijing Wang  | wangweijing@tju.edu.cn |VikingStudyHard|
 
 
 \* *corresponding author*
