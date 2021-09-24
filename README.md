@@ -62,6 +62,7 @@ In the future, we are planning on testing `PLELog` on more log data.
 PyTorch v1.5.1
 python v3.8.3
 hdbscan v0.8.26
+overrides v3.1.0
 ```
 
 The mainly required python packages including PyTorch, overrides, hdbscan, scikit-learn.
