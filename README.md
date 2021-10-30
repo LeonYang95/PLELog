@@ -47,7 +47,7 @@ In the future, we are planning on testing `PLELog` on more log data.
 
 | Software System | Description                        | Time Span  | # Messages | Data Size | Link                                                      |
 |       ---       |           ----                     |    ----    |    ----    |  ----     |                ---                                        |
-| HDFS            | Hadoop distributed file system log | 38.7 hours | 11,175,629 | 1.47 GB   | Currently Omitted.                                        |
+| HDFS            | Hadoop distributed file system log | 38.7 hours | 11,175,629 | 1.47 GB   | [LogHub](https://github.com/logpai/loghub)                |
 | BGL             | Blue Gene/L supercomputer log      | 214.7 days | 4,747,963  | 708.76MB  | [Usenix-CFDR Data](https://www.usenix.org/cfdr-data#hpc4) |
 
 ## Reproducibility
@@ -119,5 +119,13 @@ optional arguments:
 
 ## Contact
 
-We are happy to see `PLELog` being applied in the real world and willing to contribute to the community. Feel free to contact us if you have any questions!
-Currently omitted.
+We are happy to see `PLELog` being applied in the real world and willing to contribute to the community. Feel free to contact us if you have any question!
+Authors information:
+
+| Name          | Email Address          | 
+| ------------- | ---------------------- | 
+| Lin Yang      | linyang@tju.edu.cn     |
+| Junjie Chen * | junjiechen@tju.edu.cn  |
+| Weijing Wang  | wangweijinG@tju.edu.cn |
+
+\* *corresponding author*
