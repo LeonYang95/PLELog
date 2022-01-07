@@ -58,12 +58,23 @@ In the future, we are planning on testing `PLELog` on more log data.
 
 **Key Packages:**
 
-```
-PyTorch v1.5.1
+
+PyTorch v1.10.1
+
 python v3.8.3
-hdbscan v0.8.26
-overrides v3.1.0
-```
+
+hdbscan v0.8.27
+
+overrides v6.1.0
+
+scikit-learn v0.24
+
+tqdm
+
+regex
+
+[Drain3](https://github.com/IBM/Drain3)
+
 
 The mainly required python packages including PyTorch, overrides, hdbscan, scikit-learn.
 `Anaconda` is recommended to manage those packages and their versions.
