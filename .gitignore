@@ -1,4 +1,6 @@
 __pycache__
 __init__.py
 .idea
-HDFS.log
+*.log
+datasets/
+outputs/

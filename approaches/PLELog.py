@@ -30,8 +30,7 @@ class PLELog:
         self.test_batch_size = 1024
         self.vocab = vocab
         self.model = AttGRUModel(vocab, self.num_layer, self.hidden_size, dropout=0.33)
-        if torch.cuda.is_available():
-            self.model = self.model.cuda(device)
+        self.model = self.model.cuda(device)
         self.loss = nn.BCELoss()
 
     def create_logger(self):
@@ -62,7 +61,7 @@ class PLELog:
     def predict(self, inputs, threshold=None):
         with torch.no_grad():
             tag_logits = self.model(inputs)
-            tag_logits = F.softmax(tag_logits)
+            tag_logits = F.softmax(tag_logits, dim=1)
         if threshold is not None:
             probs = tag_logits.detach().cpu().numpy()
             anomaly_id = self.label2id['Anomalous']
@@ -86,6 +85,7 @@ class PLELog:
             tag_correct, tag_total = 0, 0
             for onebatch in data_iter(instances, self.test_batch_size, False):
                 tinst = generate_tinsts_binary_label(onebatch, processor.tag2id, vocab, True)
+                tinst.to_cuda(device)
                 self.model.eval()
                 pred_tags, tag_logits = self.predict(tinst.inputs, threshold)
                 for inst, bmatch in batch_variable_inst(onebatch, pred_tags, tag_logits, processor.id2tag):
@@ -222,6 +222,7 @@ if __name__ == '__main__':
             for onebatch in data_iter(labeled_train, batch_size, True):
                 plelog.model.train()
                 tinst = generate_tinsts_binary_label(onebatch, processor.tag2id, vocab)
+                tinst.to_cuda(device)
                 loss = plelog.forward(tinst.inputs, tinst.targets)
                 loss_value = loss.data.cpu().numpy()
                 loss.backward()

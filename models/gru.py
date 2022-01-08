@@ -59,6 +59,7 @@ class AttGRUModel(nn.Module):
         atten_guide = torch.unsqueeze(self.atten_guide, dim=1).expand(-1, batch_size)
         atten_guide = atten_guide.transpose(1, 0)
         hiddens, state = self.rnn(embed)
+
         sent_probs = self.atten(atten_guide, hiddens, masks)
         batch_size, srclen, dim = hiddens.size()
         sent_probs = sent_probs.view(batch_size, srclen, -1)
