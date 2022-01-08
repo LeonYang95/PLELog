@@ -70,7 +70,9 @@ overrides v3.1.0
 
 The mainly required python packages including PyTorch, overrides, hdbscan, scikit-learn.
 `Anaconda` is recommended to manage those packages and their versions.
-hdbscan and overrides are not available while using anaconda, try using pip.
+hdbscan and overrides are not available while using anaconda default channel hence use the following commands:
+conda install -c conda-forge hdbscan
+conda install pytorch torchvision torchaudio cudatoolkit=10.2 -c pytorch
 
 ### Preparation
 
