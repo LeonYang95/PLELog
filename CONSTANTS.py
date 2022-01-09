@@ -19,7 +19,7 @@ from collections import Counter
 from torch.nn.parameter import Parameter
 from multiprocessing import Manager, Pool
 
-seed = 6
+seed = 2021
 random.seed(seed)  # Python random module.
 np.random.seed(seed)  # Numpy module.
 torch.manual_seed(seed)  # 为CPU设置随机种子
