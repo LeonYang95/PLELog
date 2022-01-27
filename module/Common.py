@@ -33,7 +33,7 @@ def data_iter(data, batch_size, shuffle=True):
         yield batch
 
 
-def generate_tinsts_binary_label(batch_insts, tag2id, vocab,if_evaluate=False):
+def generate_tinsts_binary_label(batch_insts, vocab, if_evaluate=False):
     slen = len(batch_insts[0].sequence)
     batch_size = len(batch_insts)
     for b in range(1, batch_size):
@@ -46,9 +46,9 @@ def generate_tinsts_binary_label(batch_insts, tag2id, vocab,if_evaluate=False):
         confidence = 0.5 * inst.confidence
         if inst.predicted == '':
             inst.predicted = inst.label
-        tinst.tags[b, tag2id[inst.predicted]] = 1 - confidence
-        tinst.tags[b, 1 - tag2id[inst.predicted]] = confidence
-        tinst.g_truth[b] = tag2id[inst.predicted]
+        tinst.tags[b, vocab.tag2id(inst.predicted)] = 1 - confidence
+        tinst.tags[b, 1 - vocab.tag2id(inst.predicted)] = confidence
+        tinst.g_truth[b] = vocab.tag2id(inst.predicted)
         cur_slen = len(inst.sequence)
         tinst.word_len[b] = cur_slen
         for index in range(cur_slen):

@@ -2,16 +2,15 @@ import sys
 
 sys.path.extend([".", ".."])
 from CONSTANTS import *
-from representations.sequences.statistics import Sequential_TF
+from sklearn.decomposition import FastICA
 from representations.templates.statistics import Simple_template_TF_IDF, Template_TF_IDF_without_clean
+from representations.sequences.statistics import Sequential_TF
+from preprocessing.datacutter.SimpleCutting import cut_by_613
+from preprocessing.AutoLabeling import Probabilistic_Labeling
+from preprocessing.Preprocess import Preprocessor
 from module.Optimizer import Optimizer
 from module.Common import data_iter, generate_tinsts_binary_label, batch_variable_inst
 from models.gru import AttGRUModel
-from preprocessing.datacutter.SimpleCutting import cut_by_613
-from preprocessing.AutoLabeling import Probabilistic_Labeling
-import argparse
-from sklearn.decomposition import FastICA
-from preprocessing.Preprocess import Preprocessor
 from utils.Vocab import Vocab
 
 lstm_hiddens = 100
@@ -21,36 +20,37 @@ epochs = 5
 
 
 class PLELog:
+    _logger = logging.getLogger('PLELog')
+    _logger.setLevel(logging.DEBUG)
+    console_handler = logging.StreamHandler(sys.stderr)
+    console_handler.setLevel(logging.DEBUG)
+    console_handler.setFormatter(
+        logging.Formatter("%(asctime)s - %(name)s - " + SESSION + " - %(levelname)s: %(message)s"))
+    file_handler = logging.FileHandler(os.path.join(LOG_ROOT, 'PLELog.log'))
+    file_handler.setLevel(logging.INFO)
+    file_handler.setFormatter(
+        logging.Formatter("%(asctime)s - %(name)s - " + SESSION + " - %(levelname)s: %(message)s"))
+    _logger.addHandler(console_handler)
+    _logger.addHandler(file_handler)
+    _logger.info(
+        'Construct logger for PLELog succeeded, current working directory: %s, logs will be written in %s' %
+        (os.getcwd(), LOG_ROOT))
+
+    @property
+    def logger(self):
+        return PLELog._logger
+
     def __init__(self, vocab, num_layer, hidden_size, label2id):
         self.label2id = label2id
-        self.logger = self.create_logger()
+        self.vocab = vocab
         self.num_layer = num_layer
         self.hidden_size = hidden_size
-        self.batch_size = 100
+        self.batch_size = 128
         self.test_batch_size = 1024
-        self.vocab = vocab
-        self.model = AttGRUModel(vocab, self.num_layer, self.hidden_size, dropout=0.33)
-        self.model = self.model.cuda(device)
+        self.model = AttGRUModel(vocab, self.num_layer, self.hidden_size)
+        if torch.cuda.is_available():
+            self.model = self.model.cuda(device)
         self.loss = nn.BCELoss()
-
-    def create_logger(self):
-        # Dispose Loggers.
-        PLELogLogger = logging.getLogger('PLELog')
-        PLELogLogger.setLevel(logging.DEBUG)
-        console_handler = logging.StreamHandler(sys.stderr)
-        console_handler.setLevel(logging.DEBUG)
-        console_handler.setFormatter(
-            logging.Formatter("%(asctime)s - %(name)s - " + SESSION + " - %(levelname)s: %(message)s"))
-        file_handler = logging.FileHandler(os.path.join(LOG_ROOT, 'PLELog.log'))
-        file_handler.setLevel(logging.INFO)
-        file_handler.setFormatter(
-            logging.Formatter("%(asctime)s - %(name)s - " + SESSION + " - %(levelname)s: %(message)s"))
-        PLELogLogger.addHandler(console_handler)
-        PLELogLogger.addHandler(file_handler)
-        PLELogLogger.info(
-            'Construct logger for PLELog succeeded, current working directory: %s, logs will be written in %s' %
-            (os.getcwd(), LOG_ROOT))
-        return PLELogLogger
 
     def forward(self, inputs, targets):
         tag_logits = self.model(inputs)
@@ -61,7 +61,7 @@ class PLELog:
     def predict(self, inputs, threshold=None):
         with torch.no_grad():
             tag_logits = self.model(inputs)
-            tag_logits = F.softmax(tag_logits, dim=1)
+            tag_logits = F.softmax(tag_logits)
         if threshold is not None:
             probs = tag_logits.detach().cpu().numpy()
             anomaly_id = self.label2id['Anomalous']
@@ -84,7 +84,7 @@ class PLELog:
             TP, TN, FP, FN = 0, 0, 0, 0
             tag_correct, tag_total = 0, 0
             for onebatch in data_iter(instances, self.test_batch_size, False):
-                tinst = generate_tinsts_binary_label(onebatch, processor.tag2id, vocab, True)
+                tinst = generate_tinsts_binary_label(onebatch, vocab, False)
                 tinst.to_cuda(device)
                 self.model.eval()
                 pred_tags, tag_logits = self.predict(tinst.inputs, threshold)
@@ -151,7 +151,6 @@ if __name__ == '__main__':
     rand_state = os.path.join(save_dir,
                               'results/PLELog/' + dataset + '_' + parser +
                               '/prob_label_res/random_state')
-
     save_dir = os.path.join(PROJECT_ROOT, 'outputs')
 
     # Training, Validating and Testing instances.
@@ -159,15 +158,16 @@ if __name__ == '__main__':
     processor = Preprocessor()
     train, dev, test = processor.process(dataset=dataset, parsing=parser, cut_func=cut_by_613,
                                          template_encoding=template_encoder.present)
+    num_classes = len(processor.train_event2idx)
 
     # Log sequence representation.
     sequential_encoder = Sequential_TF(processor.embedding)
     train_reprs = sequential_encoder.present(train)
     for index, inst in enumerate(train):
         inst.repr = train_reprs[index]
-    dev_reprs = sequential_encoder.present(dev)
-    for index, inst in enumerate(dev):
-        inst.repr = dev_reprs[index]
+    # dev_reprs = sequential_encoder.present(dev)
+    # for index, inst in enumerate(dev):
+    #     inst.repr = dev_reprs[index]
     test_reprs = sequential_encoder.present(test)
     for index, inst in enumerate(test):
         inst.repr = test_reprs[index]
@@ -191,6 +191,27 @@ if __name__ == '__main__':
                                              res_file=prob_label_res_file, rand_state_file=rand_state)
 
     labeled_train = label_generator.auto_label(train, normal_ids)
+
+    # Below is used to test if the loaded result match the original clustering result.
+    TP, TN, FP, FN = 0, 0, 0, 0
+
+    for inst in labeled_train:
+        if inst.predicted == 'Normal':
+            if inst.label == 'Normal':
+                TN += 1
+            else:
+                FN += 1
+        else:
+            if inst.label == 'Anomalous':
+                TP += 1
+            else:
+                FP += 1
+    from utils.common import get_precision_recall
+
+    print(len(normal_ids))
+    print('TP %d TN %d FP %d FN %d' % (TP, TN, FP, FN))
+    p, r, f = get_precision_recall(TP, TN, FP, FN)
+    print('%.4f, %.4f, %.4f' % (p, r, f))
 
     # Load Embeddings
     vocab = Vocab()
@@ -221,7 +242,7 @@ if __name__ == '__main__':
             # start batch
             for onebatch in data_iter(labeled_train, batch_size, True):
                 plelog.model.train()
-                tinst = generate_tinsts_binary_label(onebatch, processor.tag2id, vocab)
+                tinst = generate_tinsts_binary_label(onebatch, vocab)
                 tinst.to_cuda(device)
                 loss = plelog.forward(tinst.inputs, tinst.targets)
                 loss_value = loss.data.cpu().numpy()
@@ -238,9 +259,9 @@ if __name__ == '__main__':
                     plelog.model.zero_grad()
                     global_step += 1
                 if dev:
-                    if batch_iter % 700 == 0 or batch_iter == batch_num:
+                    if batch_iter % 500 == 0 or batch_iter == batch_num:
                         plelog.logger.info('Testing on test set.')
-                        _, _, f = plelog.evaluate(test)
+                        _, _, f = plelog.evaluate(dev)
                         if f > bestF:
                             plelog.logger.info("Exceed best f: history = %.2f, current = %.2f" % (bestF, f))
                             torch.save(plelog.model.state_dict(), best_model_file)

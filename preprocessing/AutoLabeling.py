@@ -8,6 +8,7 @@ class Probabilistic_Labeling():
     def __init__(self, min_samples, min_clust_size, res_file=None, rand_state_file=None):
         self.model = Solitary_HDBSCAN(min_cluster_size=min_clust_size, min_samples=min_samples)
         self.random_state_file = rand_state_file
+        # self.random_state_file = None
         self.res_file = res_file
         if res_file:
             folder, file = os.path.split(res_file)
@@ -105,7 +106,6 @@ class Probabilistic_Labeling():
                 state = random.getstate()
                 pickle.dump(state, writer)
         return labeled_inst
-
 
     def record_label_res(self, instances):
         with open(self.res_file, 'w', encoding='utf-8') as writer:

@@ -19,7 +19,7 @@ from collections import Counter
 from torch.nn.parameter import Parameter
 from multiprocessing import Manager, Pool
 
-seed = 2021
+seed = 6
 random.seed(seed)  # Python random module.
 np.random.seed(seed)  # Numpy module.
 torch.manual_seed(seed)  # 为CPU设置随机种子
@@ -29,7 +29,7 @@ torch.backends.cudnn.benchmark = False
 torch.backends.cudnn.deterministic = True
 
 # Device configuration
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 SESSION = hashlib.md5(
     time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime(time.time() + 8 * 60 * 60)).encode('utf-8')).hexdigest()

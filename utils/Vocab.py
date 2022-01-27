@@ -29,8 +29,8 @@ class Vocab(object):
 
     def __init__(self):
         self._id2tag = []
-        self._id2tag.append('yes')
-        self._id2tag.append('no')
+        self._id2tag.append('Normal')
+        self._id2tag.append('Anomalous')
         reverse = lambda x: dict(zip(x, range(len(x))))
         self._tag2id = reverse(self._id2tag)
         if len(self._tag2id) != len(self._id2tag):
