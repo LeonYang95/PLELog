@@ -1,8 +1,72 @@
-import torch,random
+import torch, random
 import torch.nn as nn
 from torch.autograd import Variable
 import numpy as np
+from entities.TensorInstances import TInstWithLogits
 
+
+def batch_slice(data, batch_size):
+    batch_num = int(np.ceil(len(data) / float(batch_size)))
+    for i in range(batch_num):
+        cur_batch_size = batch_size if i < batch_num - 1 else len(data) - batch_size * i
+        insts = [data[i * batch_size + b] for b in range(cur_batch_size)]
+        yield insts
+
+
+def insts_numberize(insts, vocab):
+    for inst in insts:
+        yield inst2id(inst, vocab)
+
+
+def inst2id(inst, vocab):
+    srcids = vocab.word2id(inst.src_events)
+    tagid = vocab.tag2id(inst.tag)
+    return srcids, tagid, inst
+
+
+def data_iter(data, batch_size, shuffle=True):
+    batched_data = []
+    if shuffle: np.random.shuffle(data)
+    batched_data.extend(list(batch_slice(data, batch_size)))
+    if shuffle: np.random.shuffle(batched_data)
+    for batch in batched_data:
+        yield batch
+
+
+def generate_tinsts_binary_label(batch_insts, vocab, if_evaluate=False):
+    slen = len(batch_insts[0].sequence)
+    batch_size = len(batch_insts)
+    for b in range(1, batch_size):
+        cur_slen = len(batch_insts[b].sequence)
+        if cur_slen > slen: slen = cur_slen
+    tinst = TInstWithLogits(batch_size, slen, 2)
+    b = 0
+    for inst in batch_insts:
+        tinst.src_ids.append(str(inst.id))
+        confidence = 0.5 * inst.confidence
+        if inst.predicted == '':
+            inst.predicted = inst.label
+        tinst.tags[b, vocab.tag2id(inst.predicted)] = 1 - confidence
+        tinst.tags[b, 1 - vocab.tag2id(inst.predicted)] = confidence
+        tinst.g_truth[b] = vocab.tag2id(inst.predicted)
+        cur_slen = len(inst.sequence)
+        tinst.word_len[b] = cur_slen
+        for index in range(cur_slen):
+            if index >= 500:
+                break
+            tinst.src_words[b, index] = vocab.word2id(inst.sequence[index])
+            tinst.src_masks[b, index] = 1
+        b += 1
+    return tinst
+
+
+def batch_variable_inst(insts, tagids, tag_logits, id2tag):
+    if tag_logits is None:
+        print('No prediction made, please check.')
+        exit(-1)
+    for inst, tagid, tag_logit in zip(insts, tagids, tag_logits):
+        pred_label = id2tag[tagid]
+        yield inst, pred_label == inst.label
 
 
 def tensor_2_np(t):

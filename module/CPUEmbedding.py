@@ -1,6 +1,5 @@
-import torch
-import torch.nn as nn
-import torch.nn.functional as F
+from CONSTANTS import *
+
 from torch.nn.parameter import Parameter
 
 
@@ -59,7 +58,11 @@ class CPUEmbedding(nn.Module):
             output = F.embedding(input, self.weight, self.padding_idx)
             return output.cuda(device)
         else:
-            return F.embedding(input, self.weight, self.padding_idx)
+            try:
+                output = F.embedding(input, self.weight, self.padding_idx)
+            except IndexError:
+                print(input)
+            return output
 
     def extra_repr(self):
         s = '{num_embeddings}, {embedding_dim}'

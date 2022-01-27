@@ -256,7 +256,7 @@ class LinearAttention(torch.nn.Module):
         self._weight_vector.data.uniform_(-std, std)
         self._bias.data.fill_(0)
 
-    @overrides
+    @overrides(check_signature=False)
     def forward(self,  # pylint: disable=arguments-differ
                 vector: torch.Tensor,
                 matrix: torch.Tensor,
@@ -297,7 +297,7 @@ class Generator(torch.nn.Module):
         super(Generator, self).__init__()
         self.project = nn.Linear(in_features=tensor_1_dim, out_features=tensor_2_dim)
 
-    @overrides
+    @overrides(check_signature=False)
     def forward(self,  # pylint: disable=arguments-differ
                 vector: torch.Tensor,
                 matrix: torch.Tensor,
