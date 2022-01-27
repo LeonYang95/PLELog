@@ -1,6 +1,6 @@
 ﻿# PLELog 
  
- [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.4470181.svg)](https://doi.org/10.5281/zenodo.4470181)
+ [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.5910349.svg)](https://doi.org/10.5281/zenodo.5910349)
  
 This is the basic implementation of our submission in ICSE 2021: **Semi-supervised Log-based Anomaly Detection via Probabilistic Label Estimation**.
 - [PLELog](#plelog)
@@ -25,19 +25,19 @@ In particular, `PLELog` has been applied to two real-world systems from a univer
 ## Project Structure
 
 ```
-├─approaches  #HDBSCAN & RNN approaches here, including training, validating, and testing.
-├─config      
-├─data        #Code for data processing.
+├─approaches  # PLELog main entrance.
+├─config      # Configuration for Drain
+├─entities    # Instances for log data and DL model.
 ├─utils
-├─dataset
-│  ├─BGL      #Sample data for BGL (Quick start)
-├─model       #RNN models.
-├─module      #Anomaly detection modules, including classifier, Attention, etc.
-├─outmodel    #Model parameters for trained models, detailed save path is set in config files.
-├─logs       
-├─output_res  #Output result of Attention-Based GRU classification model.
-├─pipeline.py #Main entrance code.
-└─test.py     #Quick start for PLELog
+├─logs        
+├─datasets    
+├─models      # Attention-based GRU and HDBSCAN Clustering.
+├─module      # Anomaly detection modules, including classifier, Attention, etc.
+├─outputs           
+├─parsers     # Drain parser.
+├─preprocessing # preprocessing code, data loaders and cutters.
+├─representations # Log template and sequence representation.
+└─util        # Vocab for DL model and some other common utils.
 ```
 
 ## Datasets
@@ -51,6 +51,8 @@ In the future, we are planning on testing `PLELog` on more log data.
 | BGL             | Blue Gene/L supercomputer log      | 214.7 days | 4,747,963  | 708.76MB  | [Usenix-CFDR Data](https://www.usenix.org/cfdr-data#hpc4) |
 
 ## Reproducibility
+
+We have published an full version of PLELog (including HDFS log dataset, glove word embdding as well as a trained model) in Zenodo, please find the project from the zenodo badge at the beginning.
 
 ### Environment
 
@@ -67,7 +69,7 @@ hdbscan v0.8.27
 
 overrides v6.1.0
 
-scikit-learn v0.24
+**scikit-learn v0.24**
 
 tqdm
 
@@ -76,57 +78,31 @@ regex
 [Drain3](https://github.com/IBM/Drain3)
 
 
-The mainly required python packages including PyTorch, overrides, hdbscan, scikit-learn.
-`Anaconda` is recommended to manage those packages and their versions.
-hdbscan and overrides are not available while using anaconda, try using pip.
+hdbscan and overrides are not available while using anaconda, try using pip or:
+`conda install -c conda-forge pkg==ver` where `pkg` is the target package and `ver` is the suggested version.
+
+**Please be noted:** Since there are some known issue about joblib, scikit-learn > 0.24 is not supported here. We'll keep watching. 
 
 ### Preparation
 
 You need to follow these steps to **completely** run `PLELog`.
-- **Step 1:** To run `PLELog` on different log data, create a directory under `dataset` folder **using unique and memorable name**(e.g. HDFS and BGL). `PLELog` will try to find the related files and create logs and results according to this name.
+- **Step 1:** To run `PLELog` on different log data, create a directory under `datasets` folder **using unique and memorable name**(e.g. HDFS and BGL). `PLELog` will try to find the related files and create logs and results according to this name.
 - **Step 2:** Move target log file (plain text, each raw contains one log message) into the folder of step 1.
-- **Step 3:** Run `utils/Drain.py` (make sure it has proper parameters) to finish log parsing and extract log templates. You can find the details about Drain parser from [IBM](https://github.com/IBM/Drain3).
-- **Step 4:** Download [Stanford NLP word embeddings](https://nlp.stanford.edu/projects/glove/), rename as `nlp-word.vec` and put it under `dataset` folder.
+- **Step 3:** Download `glove.6B.300d.txt` from [Stanford NLP word embeddings](https://nlp.stanford.edu/projects/glove/), and put it under `datasets` folder.
+- **Step 4:** Run `approaches/PLELog.py` (make sure it has proper parameters). You can find the details about Drain parser from [IBM](https://github.com/IBM/Drain3).
+
 
 **Note:** Since log can be very different, here in this repository, we only provide the processing approach of HDFS and BGL w.r.t our experimental setting.
 If you want to apply `PLELog` on new log data, please refer to the `prepare_data` method in `pipeline.py` to add new pre-process methods.
 
 ## Anomaly Detection
 
-- **Complete:** You can run `PLELog` from the ground up by running `pipeline.py` after the preparation. The results will be shown in the `logs` folder named after detailed settings. And the classification results are saved in the `output_res` folder for further analysis.
-- **Quick Start:** Since `HDBSCAN` may need hours to finish, we provide a trained model (on `BGL` dataset) and a test input as a quick start for `PLELog`, just run `test.py` under the correct environment.
-  Logs will be written in `log/test.log`, you can find the results at the end of the file.
-Feel free to play with `PLELog` through the command parameters below: (The results of different settings should be separated, don't worry! :P)
+To those who are interested in applying PLELog on their log data, please refer to `preprocessing/BasicLoader.py` for more instructions.
 
-```
-usage: pipeline.py [-h] [--config_file CONFIG_FILE] [--gpu GPU] [--hdbscan_option HDBSCAN_OPTION]
-                   [--dataset DATASET] [--train_ratio TRAIN_RATIO] [--dev_ratio DEV_RATIO]
-                   [--test_ratio TEST_RATIO] [--min_cluster_size MIN_CLUSTER_SIZE]
-                   [--min_samples MIN_SAMPLES] [--reduce_dim REDUCE_DIM]
-optional arguments:
-  -h, --help            show this help message and exit
-  --config_file CONFIG_FILE
-                        Configuration file for Attention-Based GRU Network.
-  --gpu GPU             GPU ID if using cuda, -1 if cpu.
-  --hdbscan_option HDBSCAN_OPTION
-                        Different strategies of HDBSCAN clustering. 0 for PLELog_noP, 1 for PLELog, -1 for upperbound.
-  --dataset DATASET     
-                        Choose dataset, HDFS or BGL.
-  --train_ratio TRAIN_RATIO
-                        Ratio of train data. Default 6.
-  --dev_ratio DEV_RATIO
-                        Ratio of dev data. Default 1.
-  --test_ratio TEST_RATIO
-                        Ratio of test data. Default 3.
-  --min_cluster_size MIN_CLUSTER_SIZE
-                        Minimum cluster size, a parameter of HDBSCAN.
-  --min_samples MIN_SAMPLES
-                        Minimum samples, a parameter of HDBSCAN.
-  --reduce_dim REDUCE_DIM
-                        Target dimension of FastICA.
-  --thredshold THRESHOLD
-                        Threshold for final classification, any instance with "anomalous score" higher than this threshold will be regarded as anomaly.
-```
+- **Step 1:** To run `PLELog` on different log data, create a directory under `datasets` folder **using unique and memorable name**(e.g. HDFS and BGL). `PLELog` will try to find the related files and create logs and results according to this name.
+- **Step 2:** Move target log file (plain text, each raw contains one log message) into the folder of step 1.
+- **Step 3:** Create a new dataloader class implementing `BasicLoader`. 
+- **Step 4:** Go to `preprocessing/Preprocess.py` and add your new log data into acceptable variables.
 
 ## Contact
 
