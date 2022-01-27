@@ -3,8 +3,6 @@
  [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.5910349.svg)](https://doi.org/10.5281/zenodo.5910349)
  
  
-**Please be NOTED that we are going on some major improve work on PLELog, the current version is useable but not as well as I was expected. We'll keep updating codes and make sure it is easy for anyone who are interested in our research. Sorry for the inconvenience during this time. New PLELog will see you soon!**
-
 This is the basic implementation of our submission in ICSE 2021: **Semi-supervised Log-based Anomaly Detection via Probabilistic Label Estimation**.
 - [PLELog](#plelog)
   * [Description](#description)
