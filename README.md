@@ -94,11 +94,11 @@ You need to follow these steps to **completely** run `PLELog`.
 
 
 **Note:** Since log can be very different, here in this repository, we only provide the processing approach of HDFS and BGL w.r.t our experimental setting.
-If you want to apply `PLELog` on new log data, please refer to the `prepare_data` method in `pipeline.py` to add new pre-process methods.
+
 
 ## Anomaly Detection
 
-To those who are interested in applying PLELog on their log data, please refer to `preprocessing/BasicLoader.py` for more instructions.
+To those who are interested in applying PLELog on their log data, please refer to `BasicLoader` abstract class in preprocessing/BasicLoader.py` for more instructions.
 
 - **Step 1:** To run `PLELog` on different log data, create a directory under `datasets` folder **using unique and memorable name**(e.g. HDFS and BGL). `PLELog` will try to find the related files and create logs and results according to this name.
 - **Step 2:** Move target log file (plain text, each raw contains one log message) into the folder of step 1.
