@@ -57,7 +57,7 @@ We have published an full version of PLELog (including HDFS log dataset, glove w
 
 ### Environment
 
-**Note:** We attach great importance to the reproducibility of `PLELog`. To run and reproduce our results, please try to install the suggested version of the key packages.
+**Note:** We attach great importance to the reproducibility of `PLELog`. Here we list some of the key packages to reproduce our results. However, as discussed in [issue#14](https://github.com/YangLin-George/PLELog/issues/14), please refer to the `requirements.txt` file for package installation.
 
 **Key Packages:**
 
