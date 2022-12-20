@@ -57,7 +57,10 @@ We have published an full version of PLELog (including HDFS log dataset, glove w
 
 ### Environment
 
-**Note:** We attach great importance to the reproducibility of `PLELog`. Here we list some of the key packages to reproduce our results. However, as discussed in [issue#14](https://github.com/YangLin-George/PLELog/issues/14), please refer to the `requirements.txt` file for package installation.
+**Note:** 
+- We attach great importance to the reproducibility of `PLELog`. Here we list some of the key packages to reproduce our results. However, as discussed in [issue#14](https://github.com/YangLin-George/PLELog/issues/14), please refer to the `requirements.txt` file for package installation.
+
+- According to [issue#16](https://github.com/YangLin-George/PLELog/issues/16), there seems to have some problem with suggested hdbscan version, if your environment has such an error, please refer to the issue for support. Great thanks for this valuable issue!
 
 **Key Packages:**
 
