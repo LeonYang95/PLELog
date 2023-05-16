@@ -62,6 +62,8 @@ We have published an full version of PLELog (including HDFS log dataset, glove w
 
 - According to [issue#16](https://github.com/YangLin-George/PLELog/issues/16), there seems to have some problem with suggested hdbscan version, if your environment has such an error, please refer to the issue for support. Great thanks for this valuable issue!
 
+- According to [issue#19 ](https://github.com/YangLin-George/PLELog/issues/19), remove numpy version requirements from `requirements.txt` file. Great thanks for this suggestion!
+
 **Key Packages:**
 
 
