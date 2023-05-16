@@ -11,7 +11,7 @@ mkl-random==1.2.2
 mkl-service==2.4.0
 mock==4.0.3
 numexpr==2.8.1
-numpy==1.21.2
+numpy
 olefile==0.46
 overrides==6.1.0
 packaging==21.3
